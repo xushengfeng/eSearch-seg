@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "name": "Launch Program",
+            "cwd": "${workspaceFolder}/js",
+            "program": "./js.js",
+            "request": "launch",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "type": "node"
+        },
+        {
+            "name": "Debug Main Process",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/js",
+            "runtimeExecutable": "${workspaceFolder}/js/node_modules/.bin/electron",
+            "windows": {
+                "runtimeExecutable": "${workspaceFolder}/js/node_modules/.bin/electron.cmd"
+            },
+            "args": ["."]
+        }
+    ]
+}
