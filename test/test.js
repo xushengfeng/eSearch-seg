@@ -15,7 +15,7 @@ async function start() {
         canvas.width = img.width;
         canvas.height = img.height;
         canvas.getContext("2d").drawImage(img, 0, 0);
-        x.seg(canvas.getContext("2d").getImageData(0, 0, img.width, img.height)).then((v) => {
+        x.seg(canvas.getContext("2d").getImageData(0, 0, img.width, img.height)).then((data) => {
             xx.width = data.width;
             xx.height = data.height;
             xx.getContext("2d").putImageData(data, 0, 0);
