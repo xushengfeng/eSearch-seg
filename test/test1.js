@@ -16,8 +16,10 @@ async function start() {
 let v = document.createElement("video");
 let i = document.createElement("canvas");
 document.body.append(i);
+i.style.filter = "blur(60px)";
 let out = document.createElement("canvas");
 document.body.append(out);
+out.style.position = "relative";
 
 function draw() {
     const canvasCtx = i.getContext("2d");
@@ -28,6 +30,7 @@ function draw() {
         out.width = data.width;
         out.height = data.height;
         out.getContext("2d").putImageData(data, 0, 0);
+        out.style.top = `-${i.height}px`;
     });
     setTimeout(() => {
         draw();
