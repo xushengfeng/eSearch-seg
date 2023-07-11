@@ -74,8 +74,7 @@ function resizeImg(data: ImageData, w: number, h: number) {
 }
 
 function beforeSeg(image: ImageData) {
-    // image = resizeImg(image, 256, 144);
-    image = resizeImg(image, 398, 224);
+    image = resizeImg(image, 256, 144);
 
     const transposedData = toPaddleInput(image, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
     if (dev) {
