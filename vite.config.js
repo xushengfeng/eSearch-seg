@@ -6,7 +6,7 @@ export default defineConfig({
     build: {
         lib: {
             entry: resolve(__dirname, "src/main.ts"),
-            name: "esearch-ocr",
+            name: "esearch-seg",
         },
         sourcemap: true,
     },

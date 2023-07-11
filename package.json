@@ -1,16 +1,16 @@
 {
-    "name": "esearch-ocr",
-    "version": "4.1.0",
-    "description": "paddleocr models run on onnx",
-    "main": "./dist/esearch-ocr.umd.cjs",
-    "module": "./dist/esearch-ocr.js",
+    "name": "esearch-seg",
+    "version": "1.0.0",
+    "description": "paddleseg models run on onnx",
+    "main": "./dist/esearch-seg.umd.cjs",
+    "module": "./dist/esearch-seg.js",
     "exports": {
         ".": {
-            "import": "./dist/esearch-ocr.js",
-            "require": "./dist/esearch-ocr.umd.cjs"
+            "import": "./dist/esearch-seg.js",
+            "require": "./dist/esearch-seg.umd.cjs"
         }
     },
-    "homepage": "https://github.com/xushengfeng/eSearch-OCR",
+    "homepage": "https://github.com/xushengfeng/eSearch-seg",
     "type": "module",
     "types": "./src/main.ts",
     "scripts": {
@@ -20,8 +20,8 @@
         "preview": "vite preview"
     },
     "keywords": [
-        "ocr",
-        "paddleocr",
+        "seg",
+        "paddleseg",
         "onnx"
     ],
     "author": {
@@ -29,9 +29,6 @@
         "email": "xushengfeng_zg@163.com"
     },
     "license": "Apache-2.0",
-    "dependencies": {
-        "js-clipper": "^1.0.1"
-    },
     "peerDependencies": {
         "opencv.js": "^1.2.1"
     },
