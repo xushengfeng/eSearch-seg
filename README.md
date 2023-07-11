@@ -1,42 +1,36 @@
-# eSearch-OCR
+# eSearch-seg
 
-本仓库是 [eSearch](https://github.com/xushengfeng/eSearch)的 OCR 服务依赖
+本仓库是 [eSearch](https://github.com/xushengfeng/eSearch)的录屏人像识别依赖
 
-支持本地 OCR（基于 [PaddleOCR](https://github.com/PaddlePaddle/PaddleOCR)）
-
-[PaddleOCR License](https://github.com/PaddlePaddle/PaddleOCR/blob/release/2.4/LICENSE)
-
-[paddle 预测库](https://paddle-inference.readthedocs.io/en/latest/user_guides/download_lib.html)
+基于 [PaddleSeg](https://github.com/PaddlePaddle/PaddleSeg)
 
 基于[onnxruntime](https://github.com/microsoft/onnxruntime)的 web runtime，使用 wasm 运行，未来可能使用 webgl 甚至是 webgpu。
 
 模型需要转换为 onnx 才能使用：[Paddle2ONNX](https://github.com/PaddlePaddle/Paddle2ONNX) 或[在线转换](https://www.paddlepaddle.org.cn/paddle/visualdl/modelconverter/x2paddle)
 
-在 js 文件下使用 electron 进行调试（主要是 require 几个模块和 fs 读取字典，若想纯网页实现，可以自行修改）
+在 js 文件下使用 electron 进行调试（需要 HTML canvas，暂不支持纯 nodejs）
 
 ## 使用
 
 ```shell
-npm i esearch-ocr
+npm i esearch-seg
 ```
 
 web
 
 ```javascript
-import * as ocr from "esearch-ocr";
+import * as seg from "esearch-seg";
 ```
 
 nodejs
 
 ```javascript
-const ocr = require("esearch-ocr");
+const seg = require("esearch-seg");
 ```
 
 ```javascript
-await lo.init({
-    detPath: "ocr/det.onnx",
-    recPath: "ocr/rec.onnx",
-    dic: "",
+await seg.init({
+    segPath: "seg.onnx",
 });
 
 let img = document.createElement("img");
@@ -46,8 +40,8 @@ img.onload = async () => {
     canvas.width = img.width;
     canvas.height = img.height;
     canvas.getContext("2d").drawImage(img, 0, 0);
-    ocr.ocr(canvas.getContext("2d").getImageData(0, 0, img.width, img.height))
-        .then((l) => {})
+    seg.seg(canvas.getContext("2d").getImageData(0, 0, img.width, img.height))
+        .then((data) => {})
         .catch((e) => {});
 };
 ```
@@ -56,26 +50,14 @@ init type
 
 ```typescript
 {
-    detPath: string;
-    recPath: string;
-    dic: string; // raw !string[] && !filePath
+    segPath: string;
     node?: boolean;
     dev?: boolean;
-    maxSide?: number;
-    imgh?: number;
-    imgw?: number;
     ort?: typeof import("onnxruntime-web");
-    detShape?: [number, number];
-}
 ```
 
 ocr type
 
 ```typescript
-type PointType = [number, number]
-ocr(img: ImageData): Promise<{
-    text: string;
-    mean: number;
-    box: [PointType, PointType, PointType, PointType]; // lt rt rb lb
-}[]>
+seg(img: ImageData): Promise<ImageData> // 人像
 ```
