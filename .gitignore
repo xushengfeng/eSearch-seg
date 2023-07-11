@@ -6,5 +6,6 @@ assets
 node_modules
 test/m
 *.png
+*.webp
 PaddleOCR
 dist
