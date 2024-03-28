@@ -1,23 +1,15 @@
 var cv = require("opencv.js");
-var ort: typeof import("onnxruntime-web");
+var ort: typeof import("onnxruntime-node");
 
 export { x as seg, init };
 
 var dev = true;
 type AsyncType<T> = T extends Promise<infer U> ? U : never;
-type SessionType = AsyncType<ReturnType<typeof import("onnxruntime-web").InferenceSession.create>>;
+type SessionType = AsyncType<ReturnType<typeof import("onnxruntime-node").InferenceSession.create>>;
 var det: SessionType;
 
-async function init(x: { segPath: string; node?: boolean; dev?: boolean; ort?: typeof import("onnxruntime-web") }) {
-    if (x.ort) {
-        ort = x.ort;
-    } else {
-        if (x.node) {
-            ort = require("onnxruntime-node");
-        } else {
-            ort = require("onnxruntime-web");
-        }
-    }
+async function init(x: { segPath: string; dev?: boolean; ort: typeof import("onnxruntime-node") }) {
+    ort = x.ort;
     dev = x.dev;
     det = await ort.InferenceSession.create(x.segPath);
     return new Promise((rs) => rs(true));
