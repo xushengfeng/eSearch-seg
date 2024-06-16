@@ -8,10 +8,15 @@ type AsyncType<T> = T extends Promise<infer U> ? U : never;
 type SessionType = AsyncType<ReturnType<typeof import("onnxruntime-node").InferenceSession.create>>;
 var det: SessionType;
 
-async function init(x: { segPath: string; dev?: boolean; ort: typeof import("onnxruntime-node") }) {
+async function init(x: {
+    segPath: string;
+    dev?: boolean;
+    ort: typeof import("onnxruntime-node");
+    ortOption?: import("onnxruntime-node").InferenceSession.SessionOptions;
+}) {
     ort = x.ort;
     dev = x.dev;
-    det = await ort.InferenceSession.create(x.segPath);
+    det = await ort.InferenceSession.create(x.segPath, x.ortOption);
     return new Promise((rs) => rs(true));
 }
 
