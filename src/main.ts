@@ -7,24 +7,33 @@ var dev = true;
 type AsyncType<T> = T extends Promise<infer U> ? U : never;
 type SessionType = AsyncType<ReturnType<typeof import("onnxruntime-node").InferenceSession.create>>;
 var det: SessionType;
+var shape = [512, 512];
+var invertOpacity = false;
+var threshold = 0;
 
 async function init(x: {
     segPath: string;
     dev?: boolean;
     ort: typeof import("onnxruntime-node");
     ortOption?: import("onnxruntime-node").InferenceSession.SessionOptions;
+    shape: [number, number];
+    invertOpacity?: boolean;
+    threshold?: number;
 }) {
     ort = x.ort;
     dev = x.dev;
     det = await ort.InferenceSession.create(x.segPath, x.ortOption);
+    if (x.shape) shape = x.shape;
+    if (x.invertOpacity) invertOpacity = x.invertOpacity;
+    if (x.threshold) threshold = x.threshold;
     return new Promise((rs) => rs(true));
 }
 
 /** 主要操作 */
 async function x(img: ImageData) {
     if (dev) console.time();
-    let { transposedData, image } = beforeSeg(img);
-    const detResults = await runSeg(transposedData, image, det);
+    let { transposedData } = beforeSeg(img);
+    const detResults = await runSeg(transposedData, det);
     if (dev) {
         console.log(detResults);
         console.timeEnd();
@@ -34,11 +43,11 @@ async function x(img: ImageData) {
     return data;
 }
 
-async function runSeg(transposedData: number[][][], image: ImageData, det: SessionType) {
-    let x = transposedData.flat(Infinity) as number[];
+async function runSeg(transposedData: number[][][], det: SessionType) {
+    const x = transposedData.flat(2) as number[];
     const detData = Float32Array.from(x);
 
-    const detTensor = new ort.Tensor("float32", detData, [1, 3, image.height, image.width]);
+    const detTensor = new ort.Tensor("float32", detData, [1, 3, transposedData[0].length, transposedData[0][0].length]);
     let detFeed = {};
     detFeed[det.inputNames[0]] = detTensor;
 
@@ -71,7 +80,7 @@ function resizeImg(data: ImageData, w: number, h: number) {
 }
 
 function beforeSeg(image: ImageData) {
-    image = resizeImg(image, 256, 144);
+    image = resizeImg(image, shape[0], shape[1]);
 
     const transposedData = toPaddleInput(image, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
     if (dev) {
@@ -82,60 +91,27 @@ function beforeSeg(image: ImageData) {
 }
 
 function afterSeg(data: AsyncType<ReturnType<typeof runSeg>>["data"], w: number, h: number, srcData: ImageData) {
-    var myImageData = new ImageData(w, h);
+    const myImageData = new ImageData(w, h);
     for (let i = 0; i < w * h; i++) {
         let n = Number(i) * 4;
-        const v = (data[i] as number) > 0.8 ? 0 : 255;
-        myImageData.data[n] = myImageData.data[n + 1] = myImageData.data[n + 2] = myImageData.data[n + 3] = v;
+        const v = 255 * (data[i] as number);
+        myImageData.data[n] = myImageData.data[n + 1] = myImageData.data[n + 2] = 0;
+        myImageData.data[n + 3] = invertOpacity ? 255 - v : v;
     }
     let maskEl = data2canvas(myImageData);
     if (dev) {
         document.body.append(maskEl);
     }
 
-    // 只保留最大区域
-    let src = cv.imread(maskEl);
-    cv.cvtColor(src, src, cv.COLOR_RGBA2GRAY, 0);
-    let contours = new cv.MatVector();
-    let hierarchy = new cv.Mat();
-    cv.findContours(src, contours, hierarchy, cv.RETR_LIST, cv.CHAIN_APPROX_SIMPLE);
-
-    let largestContour = contours.get(0);
-    let largestArea = 0;
-    if (largestContour) {
-        largestArea = cv.contourArea(largestContour);
-        for (let i = 0; i < contours.size(); i++) {
-            let cnt = contours.get(i);
-            let a = cv.contourArea(cnt);
-            if (a > largestArea) {
-                largestArea = a;
-                largestContour = cnt;
-            }
-        }
-        let lCntS = new cv.MatVector();
-        lCntS.set(0, largestContour);
-        let mmask = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC1);
-        cv.drawContours(mmask, lCntS, 0, [255, 255, 255, 255], -1);
-        let result = new cv.Mat.zeros(src.rows, src.cols, cv.CV_8UC3);
-        src.copyTo(result, mmask);
-        cv.imshow(maskEl, src);
-    }
-
-    src.delete();
-    contours.delete();
-    hierarchy.delete();
-
-    src = contours = hierarchy = null;
-
     let newMaskData = maskEl.getContext("2d").getImageData(0, 0, maskEl.width, maskEl.height);
     let mask = resizeImg(newMaskData, srcData.width, srcData.height);
     for (let i = 0; i < mask.data.length; i += 4) {
-        if (mask.data[i] != 255) {
-            // 表现为黑色，应删除
+        const op = mask.data[i + 3] < threshold * 255 ? 0 : mask.data[i + 3];
+        srcData.data[i + 3] = op;
+        if (op === 0) {
             srcData.data[i] = 0;
             srcData.data[i + 1] = 0;
             srcData.data[i + 2] = 0;
-            srcData.data[i + 3] = 0;
         }
     }
     if (dev) {
