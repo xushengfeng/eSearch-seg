@@ -33,9 +33,6 @@
         "email": "xushengfeng_zg@163.com"
     },
     "license": "Apache-2.0",
-    "peerDependencies": {
-        "opencv.js": "^1.2.1"
-    },
     "devDependencies": {
         "onnxruntime-node": "^1.12.1",
         "electron": "^20.0.1",

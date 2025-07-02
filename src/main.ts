@@ -1,4 +1,3 @@
-var cv = require("opencv.js");
 var ort: typeof import("onnxruntime-node");
 
 export { x as seg, init };
