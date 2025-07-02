@@ -33,14 +33,14 @@ async function init(x: {
 /** 主要操作 */
 async function x(img: ImageData) {
     if (dev) console.time();
-    let { transposedData } = beforeSeg(img);
+    const { transposedData } = beforeSeg(img);
     const detResults = await runSeg(transposedData, det);
     if (dev) {
         console.log(detResults);
         console.timeEnd();
     }
 
-    let data = afterSeg(
+    const data = afterSeg(
         detResults.data,
         detResults.dims[3],
         detResults.dims[2],
@@ -59,7 +59,7 @@ async function runSeg(transposedData: number[][][], det: SessionType) {
         transposedData[0].length,
         transposedData[0][0].length,
     ]);
-    let detFeed = {};
+    const detFeed = {};
     detFeed[det.inputNames[0]] = detTensor;
 
     const detResults = await det.run(detFeed);
@@ -67,7 +67,7 @@ async function runSeg(transposedData: number[][][], det: SessionType) {
 }
 
 function data2canvas(data: ImageData, w?: number, h?: number) {
-    let x = document.createElement("canvas");
+    const x = document.createElement("canvas");
     x.width = w || data.width;
     x.height = h || data.height;
     x.getContext("2d").putImageData(data, 0, 0);
@@ -81,8 +81,8 @@ function data2canvas(data: ImageData, w?: number, h?: number) {
  * @param {number} h 输出高
  */
 function resizeImg(data: ImageData, w: number, h: number) {
-    let x = data2canvas(data);
-    let src = document.createElement("canvas");
+    const x = data2canvas(data);
+    const src = document.createElement("canvas");
     src.width = w;
     src.height = h;
     src.getContext("2d").scale(w / data.width, h / data.height);
@@ -99,7 +99,7 @@ function beforeSeg(image: ImageData) {
         [0.5, 0.5, 0.5],
     );
     if (dev) {
-        let srcCanvas = data2canvas(image);
+        const srcCanvas = data2canvas(image);
         document.body.append(srcCanvas);
     }
     return { transposedData, image };
@@ -113,7 +113,7 @@ function afterSeg(
 ) {
     const myImageData = new ImageData(w, h);
     for (let i = 0; i < w * h; i++) {
-        let n = Number(i) * 4;
+        const n = Number(i) * 4;
         const v = 255 * (data[i] as number);
         myImageData.data[n] =
             myImageData.data[n + 1] =
@@ -121,15 +121,15 @@ function afterSeg(
                 0;
         myImageData.data[n + 3] = invertOpacity ? 255 - v : v;
     }
-    let maskEl = data2canvas(myImageData);
+    const maskEl = data2canvas(myImageData);
     if (dev) {
         document.body.append(maskEl);
     }
 
-    let newMaskData = maskEl
+    const newMaskData = maskEl
         .getContext("2d")
         .getImageData(0, 0, maskEl.width, maskEl.height);
-    let mask = resizeImg(newMaskData, srcData.width, srcData.height);
+    const mask = resizeImg(newMaskData, srcData.width, srcData.height);
     for (let i = 0; i < mask.data.length; i += 4) {
         const op = mask.data[i + 3] < threshold * 255 ? 0 : mask.data[i + 3];
         srcData.data[i + 3] = op;
@@ -140,7 +140,7 @@ function afterSeg(
         }
     }
     if (dev) {
-        let x = data2canvas(srcData);
+        const x = data2canvas(srcData);
         document.body.append(x);
     }
     return srcData;
@@ -161,7 +161,7 @@ function toPaddleInput(image: ImageData, mean: number[], std: number[]) {
         greenArray[y][x] = (imagedata[i + 1] / 255 - mean[1]) / std[1];
         blueArray[y][x] = (imagedata[i + 2] / 255 - mean[2]) / std[2];
         x++;
-        if (x == image.width) {
+        if (x === image.width) {
             x = 0;
             y++;
         }
