@@ -5,7 +5,9 @@ export { x as seg, init };
 
 var dev = true;
 type AsyncType<T> = T extends Promise<infer U> ? U : never;
-type SessionType = AsyncType<ReturnType<typeof import("onnxruntime-node").InferenceSession.create>>;
+type SessionType = AsyncType<
+    ReturnType<typeof import("onnxruntime-node").InferenceSession.create>
+>;
 var det: SessionType;
 var shape = [512, 512];
 var invertOpacity = false;
@@ -39,7 +41,12 @@ async function x(img: ImageData) {
         console.timeEnd();
     }
 
-    let data = afterSeg(detResults.data, detResults.dims[3], detResults.dims[2], img);
+    let data = afterSeg(
+        detResults.data,
+        detResults.dims[3],
+        detResults.dims[2],
+        img,
+    );
     return data;
 }
 
@@ -47,7 +54,12 @@ async function runSeg(transposedData: number[][][], det: SessionType) {
     const x = transposedData.flat(2) as number[];
     const detData = Float32Array.from(x);
 
-    const detTensor = new ort.Tensor("float32", detData, [1, 3, transposedData[0].length, transposedData[0][0].length]);
+    const detTensor = new ort.Tensor("float32", detData, [
+        1,
+        3,
+        transposedData[0].length,
+        transposedData[0][0].length,
+    ]);
     let detFeed = {};
     detFeed[det.inputNames[0]] = detTensor;
 
@@ -82,7 +94,11 @@ function resizeImg(data: ImageData, w: number, h: number) {
 function beforeSeg(image: ImageData) {
     image = resizeImg(image, shape[0], shape[1]);
 
-    const transposedData = toPaddleInput(image, [0.5, 0.5, 0.5], [0.5, 0.5, 0.5]);
+    const transposedData = toPaddleInput(
+        image,
+        [0.5, 0.5, 0.5],
+        [0.5, 0.5, 0.5],
+    );
     if (dev) {
         let srcCanvas = data2canvas(image);
         document.body.append(srcCanvas);
@@ -90,12 +106,20 @@ function beforeSeg(image: ImageData) {
     return { transposedData, image };
 }
 
-function afterSeg(data: AsyncType<ReturnType<typeof runSeg>>["data"], w: number, h: number, srcData: ImageData) {
+function afterSeg(
+    data: AsyncType<ReturnType<typeof runSeg>>["data"],
+    w: number,
+    h: number,
+    srcData: ImageData,
+) {
     const myImageData = new ImageData(w, h);
     for (let i = 0; i < w * h; i++) {
         let n = Number(i) * 4;
         const v = 255 * (data[i] as number);
-        myImageData.data[n] = myImageData.data[n + 1] = myImageData.data[n + 2] = 0;
+        myImageData.data[n] =
+            myImageData.data[n + 1] =
+            myImageData.data[n + 2] =
+                0;
         myImageData.data[n + 3] = invertOpacity ? 255 - v : v;
     }
     let maskEl = data2canvas(myImageData);
@@ -103,7 +127,9 @@ function afterSeg(data: AsyncType<ReturnType<typeof runSeg>>["data"], w: number,
         document.body.append(maskEl);
     }
 
-    let newMaskData = maskEl.getContext("2d").getImageData(0, 0, maskEl.width, maskEl.height);
+    let newMaskData = maskEl
+        .getContext("2d")
+        .getImageData(0, 0, maskEl.width, maskEl.height);
     let mask = resizeImg(newMaskData, srcData.width, srcData.height);
     for (let i = 0; i < mask.data.length; i += 4) {
         const op = mask.data[i + 3] < threshold * 255 ? 0 : mask.data[i + 3];
