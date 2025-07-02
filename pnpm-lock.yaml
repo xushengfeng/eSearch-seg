@@ -7,10 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      opencv.js:
-        specifier: ^1.2.1
-        version: 1.2.1
     devDependencies:
       onnxruntime-node:
         specifier: ^1.12.1
@@ -181,9 +177,6 @@ packages:
     resolution: {integrity: sha512-H06kB4tRcZf93YDipL2nG5Oqs8WGhZzpWMgWUhH8r6ciGTZ85JrZpHuqRIabTS6Rls/IjbnBcrPXYPZnSgXqkQ==}
     os: [win32, darwin, linux]
 
-  opencv.js@1.2.1:
-    resolution: {integrity: sha512-+ji5Pk3eyz+RRSeZr2kLZNJpjsKoGyPJOjFWng7+Cuq9ylHakBqJMxDGlBW1+qdju3k8DadWOiHJ6JaF28UpKA==}
-
   picocolors@1.0.0:
     resolution: {integrity: sha512-1fygroTLlHu66zi26VoTDv8yRgm0Fccecssto+MhsZ0D/DGW2sm8E8AjW7NU5VVTRt5GxbeZ5qBuJr+HyLYkjQ==}
 
@@ -336,8 +329,6 @@ snapshots:
   onnxruntime-node@1.12.1:
     dependencies:
       onnxruntime-common: 1.12.1
-
-  opencv.js@1.2.1: {}
 
   picocolors@1.0.0: {}
 
